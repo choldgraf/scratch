@@ -1,4 +1,4 @@
-name: Build documentation
+name: Build documentation and check links
 
 on:
   workflow_dispatch:
@@ -36,5 +36,6 @@ jobs:
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
           issue-number: 1
+          issue-title: Testing title
           content-filepath: ./lychee/out.md
 
