@@ -36,13 +36,8 @@ jobs:
             --max-retries 3
           jobSummary: true
 
-      - name: Print exit code
-        run: |
-          echo '::echo::on'
-          echo ${{steps.lychee.outputs.exit_code}}
-
       - name: Create issue from Lychee output
-        if: steps.lychee.outputs.exit_code != 0
+        if: ${{steps.lychee.outputs.exit_code != 0}}
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
           issue-number: $ISSUE_NUMBER
@@ -50,6 +45,6 @@ jobs:
           content-filepath: ./lychee/out.md
 
       - name: Re-open the links issue
-        if: steps.lychee.outputs.exit_code != 0
+        if: ${{steps.lychee.outputs.exit_code != 0}}
         run: gh issue reopen $ISSUE_NUMBER
 
