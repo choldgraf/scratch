@@ -35,7 +35,7 @@ jobs:
       - name: Create Issue From File
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
-          issue-number: 3
+          issue-number: 1
           title: Broken links in documentation
           content-filepath: ./lychee/out.md
 
