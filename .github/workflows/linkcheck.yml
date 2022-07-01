@@ -2,6 +2,7 @@ name: Build documentation and check links
 
 on:
   workflow_dispatch:
+  push:
 
 env:
   ISSUE_NUMBER: 1
