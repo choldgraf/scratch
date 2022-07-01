@@ -29,7 +29,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          # github.com link below: This is a known fail
+          fail: true
           args: >
             docs/_build/**/*.html
             --insecure
