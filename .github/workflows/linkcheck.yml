@@ -1,0 +1,40 @@
+name: Build documentation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Build the documentation
+        run: |
+          pip install -r requirements.txt
+          sphinx-build docs docs/_build/html
+
+      # ref: https://github.com/lycheeverse/lychee-action
+      # ref: https://github.com/lycheeverse/lychee#commandline-parameters
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.5.0
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          # github.com link below: This is a known fail
+          args: >
+            docs/_build/**/*.html
+            --insecure
+            --max-retries 3
+          jobSummary: true
+
+      - name: Create Issue From File
+        uses: peter-evans/create-issue-from-file@v4.0.0
+        with:
+          issue-number: 1
+          content-filepath: ./lychee/out.md
+
