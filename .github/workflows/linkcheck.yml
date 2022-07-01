@@ -29,12 +29,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          fail: true
           args: >
             docs/_build/**/*.html
             --insecure
             --max-retries 3
           jobSummary: true
+
+      - name: Print exit code
+        run: echo ${{steps.lychee.outputs.exit_code}}
 
       - name: Create issue from Lychee output
         if: steps.lychee.outputs.exit_code != 0
