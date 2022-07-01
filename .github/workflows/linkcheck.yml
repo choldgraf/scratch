@@ -37,7 +37,9 @@ jobs:
           jobSummary: true
 
       - name: Print exit code
-        run: echo ${{steps.lychee.outputs.exit_code}}
+        run: |
+          echo '::echo::on'
+          echo ${{steps.lychee.outputs.exit_code}}
 
       - name: Create issue from Lychee output
         if: steps.lychee.outputs.exit_code != 0
