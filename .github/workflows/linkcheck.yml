@@ -3,6 +3,9 @@ name: Build documentation and check links
 on:
   workflow_dispatch:
 
+env:
+  ISSUE_NUMBER: 1
+
 jobs:
   check-links:
     runs-on: ubuntu-latest
@@ -21,6 +24,7 @@ jobs:
       # ref: https://github.com/lycheeverse/lychee-action
       # ref: https://github.com/lycheeverse/lychee#commandline-parameters
       - name: Link Checker
+        id: lychee
         uses: lycheeverse/lychee-action@v1.5.0
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -33,9 +37,14 @@ jobs:
           jobSummary: true
 
       - name: Create Issue From File
+        if: steps.lychee.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
-          issue-number: 1
+          issue-number: ${{ISSUE_NUMBER}}
           title: Broken links in documentation
           content-filepath: ./lychee/out.md
+
+      - name: Re-open the links issue
+        if: steps.lychee.outputs.exit_code != 0
+        run: gh issue reopen ${{ISSUE_NUMBER}}
 
