@@ -36,6 +36,12 @@ jobs:
             --max-retries 3
           jobSummary: true
 
+      - name: Print exit code
+        run: |
+          echo '::echo::on'
+          echo '${{steps.lychee.outputs.exit_code}}'
+
+
       - name: Create issue from Lychee output
         if: steps.linkCheck.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@v4.0.0
