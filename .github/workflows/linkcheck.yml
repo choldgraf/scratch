@@ -25,7 +25,6 @@ jobs:
       # ref: https://github.com/lycheeverse/lychee-action
       # ref: https://github.com/lycheeverse/lychee#commandline-parameters
       - name: Link check with Lychee
-        id: linkCheck
         uses: lycheeverse/lychee-action@v1.5.0
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -35,15 +34,10 @@ jobs:
             --insecure
             --max-retries 3
           jobSummary: true
-
-      - name: Print exit code
-        run: |
-          echo '::echo::on'
-          echo '${{steps.linkCheck.outputs.exit_code}}'
-
+        id: linkCheck
 
       - name: Create issue from Lychee output
-        if: steps.linkCheck.outputs.exit_code != 0
+        if: jobs.check-links.steps.linkCheck.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
           issue-number: $ISSUE_NUMBER
