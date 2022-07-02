@@ -28,6 +28,7 @@ jobs:
         uses: lycheeverse/lychee-action@v1.5.0
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        continue-on-error: true
         with:
           fail: true
           jobSummary: true
