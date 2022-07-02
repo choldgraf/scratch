@@ -43,7 +43,7 @@ jobs:
         if: steps.linkCheck.outcome == 'failure'
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
-          issue-number: $ISSUE_NUMBER
+          issue-number: ${{env.ISSUE_NUMBER}}
           title: Broken links in documentation
           content-filepath: ./lychee/out.md
 
