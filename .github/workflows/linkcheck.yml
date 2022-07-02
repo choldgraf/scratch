@@ -33,7 +33,6 @@ jobs:
             docs/_build/**/*.html
             --insecure
             --max-retries 3
-          jobSummary: true
         id: linkCheck
 
       - name: Create issue from Lychee output
