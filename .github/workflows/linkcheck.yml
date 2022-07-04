@@ -23,7 +23,7 @@ jobs:
       - name: Build the documentation
         run: |
           pip install -r requirements.txt
-          sphinx-build docs docs/_build/ -w sphinxwarnings.txt -q
+          sphinx-build docs docs/_build -w warnings.txt -q -b linkcheck
           # If there are warnings, set an environment variable that will open the issue
           [ -s sphinxwarnings.txt ] && echo -e "### Sphinx Warnings\n\n$(cat sphinxwarnings.txt)" > sphinxwarnings.txt && echo "HAS_ERRORS=TRUE" >> $GITHUB_ENV
 
