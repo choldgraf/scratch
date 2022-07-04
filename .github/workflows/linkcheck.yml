@@ -42,7 +42,7 @@ jobs:
 
       # This only runs if sphinxwarnings.txt is not empty
       - name: Concatenate Sphinx Warnings with lychee output
-        run: '[ -s sphinxwarnings.txt ] && echo "\n\n### Sphinx Warnings:\n" >> ./lychee/out.md && cat sphinxwarnings.txt >> ./lychee/out.md && echo "SPHINX_WARNINGS=TRUE" >> $GITHUB_ENV'
+        run: '[ -s sphinxwarnings.txt ] && echo -e "\n\n### Sphinx Warnings:\n" >> ./lychee/out.md && cat sphinxwarnings.txt >> ./lychee/out.md && echo "SPHINX_WARNINGS=TRUE" >> $GITHUB_ENV'
 
       - name: Create issue from Lychee output
         if: steps.linkCheck.outcome == 'failure' || env.SPHINX_WARNINGS == 'TRUE'
