@@ -18,39 +18,14 @@ jobs:
           python-version: '3.9'
           cache: 'pip'
 
+      # By using `-q` linkcheck will treat broken links + missing refs as warnings
+      # sphinxwarnings.txt will have text only if there are errors
       - name: Build the documentation
-        continue-on-error: true  # So we'll trigger the next steps if job fails
         run: |
           pip install -r requirements.txt
-          sphinx-build docs docs/_build/html -w sphinxwarnings.txt
-
-      # ref: https://github.com/lycheeverse/lychee-action
-      # ref: https://github.com/lycheeverse/lychee#commandline-parameters
-      - name: Link check with Lychee
-        uses: lycheeverse/lychee-action@v1.5.0
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        with:
-          jobSummary: true
-          args: >
-            docs/_build/**/*.html
-            --insecure
-            --max-retries 3
-        id: linkCheck
-
-      # Detect output files from our previous two actions and open an issue if they exist
-      - name: Concatenate warnings into one file
-        run: |
-          # Create an empty output file
-          touch errors.md
-
-          # If sphinx warnings is not empty, add it to the output file
-          [ -s sphinxwarnings.txt ] && echo -e "### Sphinx Warnings:\n" >> errors.md && cat sphinxwarnings.txt >>  errors.md && echo -e "\n\n" >>  errors.md
-          # If the lychee job fails, append its output to our errors
-          [ -s lychee/out.md ] && cat lychee/out.md >>  errors.md
-          # If errors is not empty, set environment variable
-          [ -s errors.md ] && echo "HAS_ERRORS=TRUE" >> $GITHUB_ENV
-
+          sphinx-build docs docs/_build/ -w sphinxwarnings.txt -q
+          # If there are warnings, set an environment variable that will open the issue
+          [ -s sphinxwarnings.txt ] && echo -e "### Sphinx Warnings\n\n$(cat sphinxwarnings.txt)" > sphinxwarnings.txt && echo "HAS_ERRORS=TRUE" >> $GITHUB_ENV
 
       - name: Create issue from errors output
         if: env.HAS_ERRORS == 'TRUE'
@@ -58,7 +33,7 @@ jobs:
         with:
           issue-number: ${{env.ISSUE_NUMBER}}
           title: Broken links in documentation
-          content-filepath: ./errors.md
+          content-filepath: ./sphinxwarnings.txt
 
       - name: Re-open the links issue
         if: env.HAS_ERRORS == 'TRUE'

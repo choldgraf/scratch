@@ -1,0 +1,2 @@
+[91m/home/choldgraf/github/publicRepos/scratch/docs/index.md:9: WARNING: undefined label: broken ref[39;49;00m
+[91m/home/choldgraf/github/publicRepos/scratch/docs/index.md:9: WARNING: undefined label: broken second ref[39;49;00m
