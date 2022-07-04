@@ -30,9 +30,7 @@ jobs:
         uses: lycheeverse/lychee-action@v1.5.0
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        continue-on-error: true  # So we'll trigger the next steps if job fails
         with:
-          fail: true
           jobSummary: true
           args: >
             docs/_build/**/*.html
@@ -40,19 +38,29 @@ jobs:
             --max-retries 3
         id: linkCheck
 
-      # This only runs if sphinxwarnings.txt is not empty
-      - name: Concatenate Sphinx Warnings with lychee output
-        run: '[ -s sphinxwarnings.txt ] && echo -e "\n\n### Sphinx Warnings:\n" >> ./lychee/out.md && cat sphinxwarnings.txt >> ./lychee/out.md && echo "SPHINX_WARNINGS=TRUE" >> $GITHUB_ENV'
+      # Detect output files from our previous two actions and open an issue if they exist
+      - name: Concatenate warnings into one file
+        run: |
+          # Create an empty output file
+          touch errors.md
 
-      - name: Create issue from Lychee output
-        if: steps.linkCheck.outcome == 'failure' || env.SPHINX_WARNINGS == 'TRUE'
+          # If sphinx warnings is not empty, add it to the output file
+          [ -s sphinxwarnings.txt ] && echo -e "### Sphinx Warnings:\n" >> errors.md && cat sphinxwarnings.txt >>  errors.md && echo -e "\n\n" >>  errors.md
+          # If the lychee job fails, append its output to our errors
+          [ -s lychee/out.md ] && cat lychee/out.md >>  errors.md
+          # If errors is not empty, set environment variable
+          [ -s errors.md ] && echo "HAS_ERRORS=TRUE" >> $GITHUB_ENV
+
+
+      - name: Create issue from errors output
+        if: env.HAS_ERRORS == 'TRUE'
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
           issue-number: ${{env.ISSUE_NUMBER}}
           title: Broken links in documentation
-          content-filepath: ./lychee/out.md
+          content-filepath: ./errors.md
 
       - name: Re-open the links issue
-        if: steps.linkCheck.outcome == 'failure' || env.SPHINX_WARNINGS == 'TRUE'
+        if: env.HAS_ERRORS == 'TRUE'
         run: gh issue reopen $ISSUE_NUMBER
 
