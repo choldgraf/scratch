@@ -24,14 +24,13 @@ jobs:
       # By using `-q` linkcheck will treat broken links + missing refs as warnings
       # warnings.txt will have text only if there are errors
       - name: Build the documentation
+        id: buildDocs
         continue-on-error: true
         run: |
           sphinx-build docs docs/_build -w warnings.txt -q -b linkcheck
-          # If there are warnings, set an environment variable that will open the issue
-          [ -s warnings.txt ] && echo -e "### Sphinx Warnings\n\n$(cat warnings.txt)" > warnings.txt && echo "HAS_ERRORS=TRUE" >> $GITHUB_ENV
 
       - name: Create issue from errors output
-        if: env.HAS_ERRORS == 'TRUE'
+        if: steps.buildDocs.outcome == 'failure'
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
           issue-number: ${{env.ISSUE_NUMBER}}
@@ -39,6 +38,6 @@ jobs:
           content-filepath: ./warnings.txt
 
       - name: Re-open the links issue
-        if: env.HAS_ERRORS == 'TRUE'
+        if: steps.buildDocs.outcome == 'failure'
         run: gh issue reopen $ISSUE_NUMBER
 
