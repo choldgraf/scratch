@@ -22,13 +22,13 @@ jobs:
         run: pip install -r requirements.txt
 
       # By using `-q` linkcheck will treat broken links + missing refs as warnings
-      # sphinxwarnings.txt will have text only if there are errors
+      # warnings.txt will have text only if there are errors
       - name: Build the documentation
         continue-on-error: true
         run: |
           sphinx-build docs docs/_build -w warnings.txt -q -b linkcheck
           # If there are warnings, set an environment variable that will open the issue
-          [ -s sphinxwarnings.txt ] && echo -e "### Sphinx Warnings\n\n$(cat sphinxwarnings.txt)" > sphinxwarnings.txt && echo "HAS_ERRORS=TRUE" >> $GITHUB_ENV
+          [ -s warnings.txt ] && echo -e "### Sphinx Warnings\n\n$(cat warnings.txt)" > warnings.txt && echo "HAS_ERRORS=TRUE" >> $GITHUB_ENV
 
       - name: Create issue from errors output
         if: env.HAS_ERRORS == 'TRUE'
@@ -36,7 +36,7 @@ jobs:
         with:
           issue-number: ${{env.ISSUE_NUMBER}}
           title: Broken links in documentation
-          content-filepath: ./sphinxwarnings.txt
+          content-filepath: ./warnings.txt
 
       - name: Re-open the links issue
         if: env.HAS_ERRORS == 'TRUE'
