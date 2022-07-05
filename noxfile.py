@@ -7,7 +7,8 @@ nox.options.reuse_existing_virtualenvs = True
 @nox.session
 def docs(session):
     session.install("-r", "requirements.txt")
-    session.run("sphinx-build", "-b=html", "docs/", "docs/_build/html", *session.posargs)
+    args = [] if "-b" in session.posargs else ["-b", "html"]
+    session.run("sphinx-build", "docs/", "docs/_build/html", *session.posargs)
 
 
 @nox.session(name="docs-live")
