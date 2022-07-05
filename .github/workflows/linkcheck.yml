@@ -9,9 +9,6 @@ name: Build documentation, check links, and open an issue
 on:
   workflow_call:
     inputs:
-      issue_number:
-        required: true
-        type: number
       docs_path:
         required: false
         type: string
@@ -24,9 +21,6 @@ on:
         required: false
         type: string
         default: "Broken links in documentation"
-
-env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   check-links:
