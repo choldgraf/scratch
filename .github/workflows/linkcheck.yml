@@ -1,3 +1,9 @@
+# A re-usable GitHub Workflow to run a Sphinx warning / linkcheck audit
+# This will:
+# - Build the documentation with Sphinx using linkcheck
+# - Output the warnings in a warnings.txt file
+# - If the file exists, re-format the file to be markdown
+# - (re)open an issue at the specified issue number with the formatted text
 name: Build documentation, check links, and open an issue
 
 on:
@@ -82,4 +88,3 @@ jobs:
       - name: Re-open the links issue
         if: steps.buildDocs.outcome == 'failure'
         run: gh issue reopen ${{ inputs.issue_number }}
-
