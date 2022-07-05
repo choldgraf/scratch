@@ -20,6 +20,10 @@ on:
         required: false
         type: string
         default: requirements.txt
+      issue_title:
+        required: false
+        type: string
+        default: "Broken links in documentation"
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,7 +86,7 @@ jobs:
       # If ISSUE_NUMBER is None, a new issue will be created
       - name: Check for an open issue
         run: |
-          ISSUE_NUMBER=$( gh issue list --search "Broken links in documentation" | awk '{print $1}' )
+          ISSUE_NUMBER=$( gh issue list --search "${{ inputs.issue_title }}" | awk '{print $1}' )
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
 
       - name: Create issue from errors output
@@ -90,5 +94,5 @@ jobs:
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
-          title: Broken links in documentation
+          title: ${{ inputs.issue_title }}
           content-filepath: ./warnings.txt
