@@ -77,14 +77,18 @@ jobs:
                 out.append(iline + "\n")
           warnings.write_text("\n".join(out))
 
+      # Return a list of open issues with the title we use for broken links
+      # If one exists, we update that issue. If not, then we create a new issue.
+      # If ISSUE_NUMBER is None, a new issue will be created
+      - name: Check for an open issue
+        run: |
+          ISSUE_NUMBER=$(gh issue list --search "Broken links in documentation" | head -n 1 | tr -s '[:blank:]' '\n' | head -n 1)
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+
       - name: Create issue from errors output
         if: steps.buildDocs.outcome == 'failure'
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
-          issue-number: ${{ inputs.issue_number }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
           title: Broken links in documentation
           content-filepath: ./warnings.txt
-
-      - name: Re-open the links issue
-        if: steps.buildDocs.outcome == 'failure'
-        run: gh issue reopen ${{ inputs.issue_number }}
