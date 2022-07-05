@@ -82,7 +82,7 @@ jobs:
       # If ISSUE_NUMBER is None, a new issue will be created
       - name: Check for an open issue
         run: |
-          ISSUE_NUMBER=$(gh issue list --search "Broken links in documentation" | head -n 1 | tr -s '[:blank:]' '\n' | head -n 1)
+          ISSUE_NUMBER=$( gh issue list --search "Broken links in documentation" | awk '{print $1}' )
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
 
       - name: Create issue from errors output
