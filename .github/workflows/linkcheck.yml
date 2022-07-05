@@ -1,33 +1,29 @@
-name: Build documentation and check links
+name: Build documentation, check links, and open an issue
 
 on:
-  workflow_dispatch:
-  push:
+  workflow_call:
+    inputs:
+      docs_path:
+        required: true
+        type: string
+      issue_number:
+        required: true
+        type: number
 
 env:
-  ISSUE_NUMBER: 1
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   check-links:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-          cache: 'pip'
-
-      - name: Install python
-        run: pip install -r requirements.txt
-
       # By using `-q` linkcheck will treat broken links + missing refs as warnings
       # warnings.txt will have text only if there are errors
       - name: Build the documentation and check links
         id: buildDocs
         continue-on-error: true
         run: |
-          sphinx-build docs docs/_build -w warnings.txt -q -N -b linkcheck
+          sphinx-build ${{ inputs.docs_path }} ${{ inputs.docs_path }}/_build -w warnings.txt -q -N -b linkcheck
 
       - name: Parse output and format for report
         if: steps.buildDocs.outcome == 'failure'
@@ -37,11 +33,11 @@ jobs:
         if: steps.buildDocs.outcome == 'failure'
         uses: peter-evans/create-issue-from-file@v4.0.0
         with:
-          issue-number: ${{env.ISSUE_NUMBER}}
+          issue-number: ${{ inputs.issue_number }}
           title: Broken links in documentation
           content-filepath: ./warnings.txt
 
       - name: Re-open the links issue
         if: steps.buildDocs.outcome == 'failure'
-        run: gh issue reopen $ISSUE_NUMBER
+        run: gh issue reopen ${{ inputs.issue_number }}
 
