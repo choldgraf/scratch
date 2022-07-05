@@ -10,4 +10,4 @@ jobs:
     with:
       docs_path: docs
       issue_number: 1
-      requirements_path: ./
+      requirements_path: requirements.txt
