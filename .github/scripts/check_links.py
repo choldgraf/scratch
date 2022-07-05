@@ -3,12 +3,6 @@ from pathlib import Path
 import os
 import sys
 
-SPHINX_CALL = "sphinx-build docs docs/_build -w warnings.txt -q -N -b linkcheck"
-out = run(SPHINX_CALL.split())
-if out.returncode == 0:
-    print("Sphinx build had no errors so no links are broken!")
-    sys.exit(0)
-
 # If there's an exception then there was a broken ref or link
 warnings = Path("warnings.txt").read_text().strip().split("\n")
 

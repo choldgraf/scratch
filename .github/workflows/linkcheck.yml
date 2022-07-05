@@ -27,7 +27,11 @@ jobs:
         id: buildDocs
         continue-on-error: true
         run: |
-          python .github/workflows/check_links.py
+          sphinx-build docs docs/_build -w warnings.txt -q -N -b linkcheck
+
+      - name: Parse output and format for report
+        if: steps.buildDocs.outcome == 'failure'
+        run: python .github/scripts/check_links.py
 
       - name: Create issue from errors output
         if: steps.buildDocs.outcome == 'failure'
