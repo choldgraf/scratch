@@ -3,12 +3,17 @@ name: Build documentation, check links, and open an issue
 on:
   workflow_call:
     inputs:
-      docs_path:
-        required: true
-        type: string
       issue_number:
         required: true
         type: number
+      docs_path:
+        required: false
+        type: string
+        default: .
+      requirements_path:
+        required: false
+        type: string
+        default: requirements.txt
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -17,6 +22,15 @@ jobs:
   check-links:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install python
+        run: pip install -r ${{ inputs.requirements_path }}
+
       # By using `-q` linkcheck will treat broken links + missing refs as warnings
       # warnings.txt will have text only if there are errors
       - name: Build the documentation and check links
@@ -27,7 +41,35 @@ jobs:
 
       - name: Parse output and format for report
         if: steps.buildDocs.outcome == 'failure'
-        run: python .github/scripts/check_links.py
+        shell: python
+        run: |
+          """Format a sphinx warnings file to be used in a GitHub issue.
+
+          This will:
+          - Parse a sphinx warnings file called `warnings.txt`
+          - Grab the relative file path + line number for each warning
+          - Build a GitHub link that points to this path/line
+          - It does this by assuming a GITHUB_REPOSITORY variable is defined like `ORG/REPO`
+          - Over-writes warnings.txt so that it can be inserted into a markdown file.
+          """
+          from pathlib import Path
+          import os
+
+          warnings = Path("warnings.txt")
+          repo = os.environ.get("GITHUB_REPOSITORY")
+          here = Path().resolve()
+
+          # Parse each line for the file / line number and build GitHub links.
+          out = ["### Link and reference warnings", ""]
+          for iline in warnings.read_text().strip().split("\n"):
+              file_path, warning = iline.split(": ", 1)
+              file_path, lineno = file_path.rsplit(":")
+              if str(here) in file_path:
+                  rel_path = file_path.replace(str(here), "").strip("/")
+                  out.append(f"[{rel_path}#{lineno}](https://github.com/{repo}/blob/main/{rel_path}?plain=1#L{lineno})\n- {warning}\n")
+              else:
+                out.append(iline + "\n")
+          warnings.write_text("\n".join(out))
 
       - name: Create issue from errors output
         if: steps.buildDocs.outcome == 'failure'
