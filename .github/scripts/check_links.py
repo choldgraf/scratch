@@ -16,7 +16,7 @@ for ii, iline in enumerate(warnings):
     file_path, lineno = file_path.rsplit(":")
     if str(here) in file_path:
         rel_path = file_path.replace(str(here), "").strip("/")
-        out.append(f"- [{rel_path}#{lineno}](https://github.com/{repo}/blob/main/{rel_path}?plain=1#L{lineno}): {warning}")
+        out.append(f"[{rel_path}#{lineno}](https://github.com/{repo}/blob/main/{rel_path}?plain=1#L{lineno})\n- {warning}\n")
     else:
       out.append(iline)
 Path("warnings.txt").write_text("\n".join(out))
